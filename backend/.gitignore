@@ -1,0 +1,23 @@
+# Backend secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Databases
+*.sqlite3
+*.db
+
+# Media uploads and logs
+media/
+logs/
+*.log

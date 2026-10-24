@@ -1,0 +1,10 @@
+{
+  "description": "A voice-first agritech platform for crop and fish farmers, offering tailored farming guidance, health and water assessments, farm management tools, and profit calculators.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
