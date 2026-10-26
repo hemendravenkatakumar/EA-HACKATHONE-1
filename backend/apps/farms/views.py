@@ -16,6 +16,43 @@ class CropPlotViewSet(viewsets.ModelViewSet):
             return CropPlot.objects.filter(user=user).order_by('-created_at')
         return CropPlot.objects.all().order_by('-created_at')
 
+    def perform_create(self, serializer):
+        plot = serializer.save()
+        self._mirror_to_mongo(plot)
+
+    def perform_update(self, serializer):
+        plot = serializer.save()
+        self._mirror_to_mongo(plot)
+
+    def _mirror_to_mongo(self, plot):
+        try:
+            import time
+            from agrovoice_backend.mongodb import get_crop_farms_collection
+            col = get_crop_farms_collection()
+            if col is not None:
+                col.update_one(
+                    {'sql_id': str(plot.id)},
+                    {
+                        '$set': {
+                            'sql_id': str(plot.id),
+                            'plot_name': plot.plot_name,
+                            'crop_name': plot.crop_name,
+                            'variety': plot.variety,
+                            'area_acres': float(plot.area_acres),
+                            'sowing_date': str(plot.sowing_date),
+                            'soil_type': plot.soil_type,
+                            'irrigation_type': plot.irrigation_type,
+                            'crop_stage': plot.crop_stage,
+                            'health_status': plot.health_status,
+                            'expected_yield_quintals': float(plot.expected_yield_quintals),
+                            'updated_at': time.time()
+                        }
+                    },
+                    upsert=True
+                )
+        except Exception:
+            pass
+
 
 class FishPondViewSet(viewsets.ModelViewSet):
     queryset = FishPond.objects.all().order_by('id')
@@ -27,6 +64,40 @@ class FishPondViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return FishPond.objects.filter(user=user).order_by('id')
         return FishPond.objects.all().order_by('id')
+
+    def perform_create(self, serializer):
+        pond = serializer.save()
+        self._mirror_to_mongo(pond)
+
+    def perform_update(self, serializer):
+        pond = serializer.save()
+        self._mirror_to_mongo(pond)
+
+    def _mirror_to_mongo(self, pond):
+        try:
+            import time
+            from agrovoice_backend.mongodb import get_fish_farms_collection
+            col = get_fish_farms_collection()
+            if col is not None:
+                col.update_one(
+                    {'sql_id': str(pond.id)},
+                    {
+                        '$set': {
+                            'sql_id': str(pond.id),
+                            'pond_name': pond.pond_name,
+                            'species': pond.primary_species,
+                            'stocked_count': pond.stocked_count,
+                            'current_average_weight_kg': float(pond.current_average_weight_kg),
+                            'aerator_running': pond.aerators_active,
+                            'morning_do_level': float(pond.morning_do_level),
+                            'water_ph': float(pond.water_ph),
+                            'updated_at': time.time()
+                        }
+                    },
+                    upsert=True
+                )
+        except Exception:
+            pass
 
 
 class ToggleAeratorAPIView(APIView):
